@@ -44,18 +44,31 @@ contract MyToken is owned {
         if(frozenAccount[msg.sender])
             throw;
 
+        if(!approvedAccount[msg.sender])
+            throw;
+
         balanceOf[msg.sender] -= _value;
         balanceOf[_to] += _value;
         Transfer(msg.sender, _to, _value);
     }
     //creates array of all frozen accounts
     mapping (address => bool) public frozenAccount;
-    event FrozenQuartrs(address target, bool frozen);
+    event FrozenAccount(address target, bool frozen);
+
+    //creates array of all approved accounts
+    mapping (address => bool) public approvedAccount;
+    event ApprovedAccount(address target, bool approved);
 
     //adds public event notifying clients about a frozen account
     function freezeAccount(address target, bool freeze) onlyOwner{
         frozenAccount[target] = freeze;
-        FrozenQuartrs(target, freeze);
+        FrozenAccount(target, freeze);
+    }
+
+    //adds public event notifying clients about an approved account
+    function approveAccount(address target, bool approve) onlyOwner{
+        approvedAccount[target] = approve;
+        ApprovedAccount(target, approve);
     }
 
 }
