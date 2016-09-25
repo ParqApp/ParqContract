@@ -1,0 +1,96 @@
+/*Process:
+    -API creates a meterAgreement between payer and a meterID
+    -Sets states of the agreement approve, meterstart, and meterstop
+    -API calls add15MinBlock every fifteen min, returns array of
+        agreementIDs that are started
+    -API uses get methods to execute transfer function
+    -Sets state to stopped with meterstop
+*/
+
+contract meterAgreement {
+    enum States { pending, approved, started, stopped }
+
+    struct Agreement {
+        uint256 agreementID;
+        uint256 meterID;
+        address payer;
+        States state;
+    }
+
+    uint numAgreements;
+    address payer;
+    mapping (uint256 => Agreement) public agreements;
+    Agreement[] currentAgreements;
+    uint256[] agreementIds;
+
+
+    //get functions
+    function getMeterID(uint256 agreementID) returns (uint256){
+        return agreements[agreementID].meterID;
+    }
+
+    function getPayer(uint256 agreementID) returns (address){
+        return agreements[agreementID].payer;
+    }
+
+    function getState(uint256 agreementID) returns (States){
+        return agreements[agreementID].state;
+    }
+
+    event MeterAgreement(uint256 meterID, address payer);
+
+    //creates meterAgreement, set state to pending
+    function meterAgreement(uint256 _meterID, address _payer) {
+        payer = _payer;
+        uint agreementID = numAgreements++;
+
+        agreements[agreementID].state = States.pending;
+        MeterAgreement(agreements[agreementID].meterID, agreements[agreementID].payer);
+    }
+
+    event Add15MinBlock(uint256[] agreementIDs);
+
+
+    //returns current agreements and posts event
+    function add15MinBlock() returns (uint256[]){
+        for(uint i = 0; i< currentAgreements.length; i++){
+            agreementIds[i] = (currentAgreements[i].agreementID);
+        }
+        Add15MinBlock(agreementIds);
+        return agreementIds;
+    }
+
+    event ApproveAgreement(uint agreementID);
+    //changes state of agreement to approved
+    function approveAgreement(uint agreementID){
+        agreements[agreementID].state = States.approved;
+        ApproveAgreement(agreementID);
+    }
+
+    event MeterStart(uint agreementID);
+    /*changes agreement state to started, adds agreement to current agreements
+    array*/
+
+    function meterStart(uint agreementID){
+        agreements[agreementID].state = States.started;
+        uint len = currentAgreements.length;
+        currentAgreements[len + 1] = agreements[agreementID];
+        MeterStart(agreementID);
+    }
+
+    event MeterStop(uint256 agreementID);
+
+    /*changes agreement state to stopped, takes agreements out of current
+    agreements array*/
+    function meterStop(uint agreementID){
+        agreements[agreementID].state = States.stopped;
+        uint stoppedIndex;
+        for(uint i = 0; i<currentAgreements.length; i++){
+            if(currentAgreements[i].agreementID == agreementID){
+                stoppedIndex = i;
+            }
+        }
+        delete currentAgreements[stoppedIndex];
+        MeterStop(agreementID);
+    }
+}
