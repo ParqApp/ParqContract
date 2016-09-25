@@ -1,5 +1,3 @@
-pragma solidity ^0.4.0;
-
 // creates ownership of contract so a central admin can freeze accounts
 contract owned {
     address public owner;
@@ -36,7 +34,7 @@ contract ParqCoin is owned {
     mapping (address => uint256) public balanceOf;
 
     uint numMeters;
-    mapping (uint => Meter) public meters;
+    mapping (uint => Meter) meters;
 
     string public name;
     string public symbol;
@@ -60,19 +58,19 @@ contract ParqCoin is owned {
         meterID = numMeters++; // meterID is return variable
 
         // Creates a new Location struct
-        location = Location(lat, long, alt)
+        var location = Location(lat, long, alt);
 
         // Creates new struct and saves in storage. We leave out the mapping type.
         meters[meterID] = Meter(msg.sender, cost, location);
 
-        NewMeter(msg.sender, meterID)
+        NewMeter(msg.sender, meterID);
     }
 
     // pay the meter
     function payMeter(uint _meterID) {
         var _meter = meters[_meterID];
-        uint256 _value = meter.cost;
-        address _to = meter.owner;
+        uint256 _value = _meter.cost;
+        address _to = _meter.owner;
 
         if (balanceOf[msg.sender] < _value || balanceOf[_to] + _value < balanceOf[_to])
             throw;
@@ -86,7 +84,7 @@ contract ParqCoin is owned {
 
         balanceOf[msg.sender] -= _value;
         balanceOf[_to] += _value;
-        PayMeter(msg.sender, _to, _value);
+        PayMeter(msg.sender, _meterID, _value);
     }
 
     // creates array of all frozen accounts
