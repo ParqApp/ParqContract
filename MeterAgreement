@@ -42,9 +42,8 @@ contract meterAgreement {
     //creates meterAgreement, set state to pending
     function meterAgreement(uint256 _meterID, address _payer) {
         payer = _payer;
-        uint agreementID = numAgreements++;
-
-        agreements[agreementID].state = States.pending;
+        uint256 agreementID = numAgreements++;
+        agreements[agreementID] = Agreement(agreementID, _meterID, payer, States.pending);
         MeterAgreement(agreements[agreementID].meterID, agreements[agreementID].payer);
     }
 
